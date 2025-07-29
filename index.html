@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Fantasy Draft Race with Odds Check</title>
+  <title>Fantasy Draft Race - Football Theme</title>
   <style>
     body {
       font-family: sans-serif;
@@ -14,20 +14,31 @@
     }
     .runner {
       width: 60px;
-      height: 30px;
-      background-color: #4285f4;
-      color: white;
-      text-align: center;
-      line-height: 30px;
+      height: 60px;
+      background-color: transparent;
       position: absolute;
       left: 0;
-      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .runner img {
+      width: 40px;
+      height: 40px;
     }
     .track {
       position: relative;
-      height: 40px;
-      background: #ddd;
+      height: 70px;
+      background: #228B22;
       margin-bottom: 10px;
+      border: 2px solid white;
+      background-image: repeating-linear-gradient(
+        to right,
+        #228B22,
+        #228B22 10px,
+        #2E8B57 10px,
+        #2E8B57 20px
+      );
     }
     #raceField {
       margin-top: 20px;
@@ -44,7 +55,7 @@
 </head>
 <body>
 
-<h2>Fantasy Football Draft Race (with Odds Check)</h2>
+<h2>Fantasy Football Draft Race (with Images)</h2>
 <div id="setup">
   <label>Number of Players:
     <input type="number" id="playerCount" min="2" max="12" value="6">
@@ -121,8 +132,18 @@
 
       const runner = document.createElement('div');
       runner.className = 'runner';
-      runner.innerText = name;
-      runner.style.top = '5px';
+
+      const img = document.createElement('img');
+      img.src = 'https://cdn-icons-png.flaticon.com/512/3317/3317977.png';
+      img.alt = name;
+
+      const label = document.createElement('div');
+      label.innerText = name;
+      label.style.fontSize = '12px';
+      label.style.color = 'white';
+
+      runner.appendChild(img);
+      runner.appendChild(label);
 
       track.appendChild(runner);
       raceField.appendChild(track);
@@ -181,4 +202,3 @@
 
 </body>
 </html>
-
