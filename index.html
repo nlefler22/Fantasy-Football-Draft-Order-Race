@@ -1,1 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fantasy Draft Race with Sound</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    #setup, #raceArea, #results {
+      margin-top: 20px;
+    }
+    .runner {
+      width: 60px;
+      height: 30px;
+      background-color: #4285f4;
+      color: white;
+      text-align: center;
+      line-height: 30px;
+      position: absolute;
+      left: 0;
+      border-radius: 4px;
+    }
+    .track {
+      position: relative;
+      height: 40px;
+      background: #ddd;
+      margin-bottom: 10px;
+    }
+    #raceField {
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #444;
+      border-collapse: collapse;
+      padding: 5px 10px;
+    }
+  </style>
+</head>
+<body>
 
+<h2>Fantasy Football Draft Race (with Sound)</h2>
+<div id="setup">
+  <label>Number of Players:
+    <input type="number" id="playerCount" min="2" max="12" value="6">
+  </label>
+  <button onclick="generatePlayerInputs()">Set Players</button>
+  <form id="playerForm" style="margin-top: 10px;"></form>
+  <button onclick="startRace()">Start Race</button>
+</div>
+
+<div id="raceArea">
+  <div id="raceField"></div>
+</div>
+
+<div id="results" style="display:none;">
+  <h3>Finish Order</h3>
+  <table id="resultTable">
+    <tr><th>Position</th><th>Player</th></tr>
+  </table>
+  <button onclick="resetRace()">Replay Race</button>
+</div>
+
+<audio id="whistle" src="https://www.soundjay.com/button/sounds/beep-07.mp3" preload="auto"></audio>
+<audio id="cheer" src="https://www.soundjay.com/human/sounds/applause-8.mp3" preload="auto"></audio>
+
+<script>
+  let players = [];
+  let finishOrder = [];
+  let raceFinished = 0;
+  const finishLine = 600;
+
+  function generatePlayerInputs() {
+    const count = parseInt(document.getElementById('playerCount').value);
+    const form = document.getElementById('playerForm');
+    form.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+      form.innerHTML += `
+        <div>
+          <label>Player ${i + 1} Name: <input type="text" id="name${i}" value="Player ${i + 1}"></label>
+          <label>Odds (%): <input type="number" id="odds${i}" step="0.1" value="${(100 / count).toFixed(1)}"></label>
+        </div>
+      `;
+    }
+  }
+
+  function startRace() {
+    players = [];
+    finishOrder = [];
+    raceFinished = 0;
+    const raceField = document.getElementById('raceField');
+    raceField.innerHTML = '';
+    document.getElementById('results').style.display = 'none';
+
+    const count = parseInt(document.getElementById('playerCount').value);
+    for (let i = 0; i < count; i++) {
+      const name = document.getElementById(`name${i}`).value;
+      const odds = parseFloat(document.getElementById(`odds${i}`).value);
+      const track = document.createElement('div');
+      track.className = 'track';
+      track.style.width = finishLine + 100 + 'px';
+
+      const runner = document.createElement('div');
+      runner.className = 'runner';
+      runner.innerText = name;
+      runner.style.top = '5px';
+
+      track.appendChild(runner);
+      raceField.appendChild(track);
+
+      players.push({ name, odds, element: runner, x: 0, finished: false });
+    }
+
+    // Play whistle sound
+    document.getElementById('whistle').play();
+    requestAnimationFrame(updateRace);
+  }
+
+  function updateRace() {
+    let active = 0;
+    players.forEach(player => {
+      if (player.finished) return;
+
+      if (Math.random() < (player.odds / 100)) {
+        player.x += Math.random() * 5 + 1;
+        player.element.style.left = player.x + 'px';
+      }
+
+      if (player.x >= finishLine && !player.finished) {
+        player.finished = true;
+        finishOrder.push(player.name);
+        raceFinished++;
+
+        // Play cheering sound for each finisher
+        document.getElementById('cheer').play();
+      } else if (!player.finished) {
+        active++;
+      }
+    });
+
+    if (active > 0) {
+      requestAnimationFrame(updateRace);
+    } else {
+      showResults();
+    }
+  }
+
+  function showResults() {
+    const table = document.getElementById('resultTable');
+    table.innerHTML = '<tr><th>Position</th><th>Player</th></tr>';
+    finishOrder.forEach((name, index) => {
+      const row = table.insertRow();
+      row.insertCell().innerText = index + 1;
+      row.insertCell().innerText = name;
+    });
+    document.getElementById('results').style.display = 'block';
+  }
+
+  function resetRace() {
+    startRace();
+  }
+
+  window.onload = generatePlayerInputs;
+</script>
+
+</body>
+</html>
