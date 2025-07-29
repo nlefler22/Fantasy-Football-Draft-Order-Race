@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Fantasy Draft Race with Sound</title>
+  <title>Fantasy Draft Race with Odds Check</title>
   <style>
     body {
       font-family: sans-serif;
@@ -37,17 +37,21 @@
       border-collapse: collapse;
       padding: 5px 10px;
     }
+    #totalOdds {
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
 
-<h2>Fantasy Football Draft Race (with Sound)</h2>
+<h2>Fantasy Football Draft Race (with Odds Check)</h2>
 <div id="setup">
   <label>Number of Players:
     <input type="number" id="playerCount" min="2" max="12" value="6">
   </label>
   <button onclick="generatePlayerInputs()">Set Players</button>
   <form id="playerForm" style="margin-top: 10px;"></form>
+  <div id="totalOdds">Total Odds: 0%</div>
   <button onclick="startRace()">Start Race</button>
 </div>
 
@@ -80,10 +84,23 @@
       form.innerHTML += `
         <div>
           <label>Player ${i + 1} Name: <input type="text" id="name${i}" value="Player ${i + 1}"></label>
-          <label>Odds (%): <input type="number" id="odds${i}" step="0.1" value="${(100 / count).toFixed(1)}"></label>
+          <label>Odds (%): <input type="number" id="odds${i}" step="0.1" value="${(100 / count).toFixed(1)}" oninput="updateTotalOdds()"></label>
         </div>
       `;
     }
+    updateTotalOdds();
+  }
+
+  function updateTotalOdds() {
+    let total = 0;
+    const count = parseInt(document.getElementById('playerCount').value);
+    for (let i = 0; i < count; i++) {
+      const val = parseFloat(document.getElementById(`odds${i}`).value);
+      total += isNaN(val) ? 0 : val;
+    }
+    const totalOddsElem = document.getElementById('totalOdds');
+    totalOddsElem.innerText = `Total Odds: ${total.toFixed(1)}%`;
+    totalOddsElem.style.color = (Math.abs(total - 100) < 0.1) ? 'green' : 'red';
   }
 
   function startRace() {
@@ -113,7 +130,6 @@
       players.push({ name, odds, element: runner, x: 0, finished: false });
     }
 
-    // Play whistle sound
     document.getElementById('whistle').play();
     requestAnimationFrame(updateRace);
   }
@@ -132,8 +148,6 @@
         player.finished = true;
         finishOrder.push(player.name);
         raceFinished++;
-
-        // Play cheering sound for each finisher
         document.getElementById('cheer').play();
       } else if (!player.finished) {
         active++;
@@ -167,3 +181,4 @@
 
 </body>
 </html>
+
